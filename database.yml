@@ -1,0 +1,8 @@
+production:
+  adapter: postgresql
+  encoding: UTF8
+  database: openproject
+  pool: 5
+  username: openproject
+  password: openproject
+

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+sv start postgres || exit 1
+
+cd /openproject
+
+exec 2>&1
+exec bundle exec passenger start -e production 

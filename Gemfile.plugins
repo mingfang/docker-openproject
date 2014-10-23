@@ -1,0 +1,7 @@
+gem 'openproject-plugins',    :git => 'https://github.com/opf/openproject-plugins.git',         :branch => 'stable'
+gem 'openproject-backlogs',   :git => 'https://github.com/finnlabs/openproject-backlogs.git',   :branch => 'stable'
+gem 'openproject-pdf_export', :git => 'https://github.com/finnlabs/openproject-pdf_export.git', :branch => 'stable'
+gem 'openproject-meeting',    :git => 'https://github.com/finnlabs/openproject-meeting.git',    :branch => 'stable'
+gem 'openproject-costs',      :git => 'https://github.com/finnlabs/openproject-costs.git',      :branch => 'stable'
+gem 'openproject-documents',  :git => 'https://github.com/opf/openproject-documents.git',       :branch => 'stable'
+gem 'reporting_engine',       :git => 'https://github.com/finnlabs/reporting_engine.git',       :branch => 'stable'
