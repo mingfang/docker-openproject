@@ -2,6 +2,8 @@ FROM ubuntu:14.04
  
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
+RUN locale-gen en_US en_US.UTF-8
+ENV LANG en_US.UTF-8
 
 #Runit
 RUN apt-get install -y runit 
@@ -17,52 +19,55 @@ RUN sed -i "s/PermitRootLogin without-password/#PermitRootLogin without-password
 #Utilities
 RUN apt-get install -y vim less net-tools inetutils-ping curl git telnet nmap socat dnsutils netcat tree htop unzip sudo software-properties-common
 
-RUN apt-get install -y gcc make libxml2-dev libxslt-dev g++ libpq-dev
-RUN apt-get install -y postgresql postgresql-contrib
+#MySql
+RUN apt-get install -y mysql-server mysql-client 
+
+#Memcache
+RUN apt-get install -y memcached
+
+#Require libs
+RUN apt-get install -y zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libmysqlclient-dev libpq-dev libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libgdbm-dev libncurses5-dev automake libtool bison libffi-dev
+
+#Node
+RUN curl http://nodejs.org/dist/v0.10.33/node-v0.10.33-linux-x64.tar.gz | tar xz
+RUN mv node* node && \
+    ln -s /node/bin/node /usr/local/bin/node && \
+    ln -s /node/bin/npm /usr/local/bin/npm
+ENV NODE_PATH /usr/local/lib/node_modules
+RUN npm -g install bower
 
 #Ruby
-RUN curl http://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.2.tar.gz | tar -xz && \
+RUN curl http://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.4.tar.gz | tar -xz && \
     cd ruby* && \
     ./configure && \
     make && \
     make install && \
     cd / && \
     rm -rf ruby*
-#Bundler
-RUN gem install bundler --version '>=1.5.1'
+RUN gem install bundler
 
-#Openproject stable branch
-ENV OPENPROJECT_VERSION 3.0.3
-RUN git clone --depth 1 --branch stable https://github.com/opf/openproject.git
-
+#Openproject
+RUN git clone https://github.com/opf/openproject.git
+ENV CONFIGURE_OPTS --disable-install-doc
+#Workaround yanked gem
+RUN mkdir -p /openproject/vendor/cache && \
+    cd /openproject/vendor/cache && \
+    wget https://rubygems.org/downloads/sprockets-2.2.2.backport2.gem
+#Plugins
 ADD Gemfile.plugins /openproject/
+#Passenger
 ADD Gemfile.local /openproject/
 RUN cd openproject && \
-    bundle install --without mysql mysql2 sqlite development test rmagick
+    git checkout stable && \
+    bundle install --without development test && \
+    npm install && \
+    bower install --allow-root
 
-#Memcache
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y memcached
+#Init DB
+ADD configuration.yml /openproject/config/
+ADD database.yml /openproject/config/
+ADD preparedb.sh /
+RUN /preparedb.sh
 
 #Add runit services
 ADD sv /etc/service 
-
-RUN runsv /etc/service/postgres & sleep 2 && sv start postgres && \
-    sudo -u postgres psql -c "CREATE USER openproject WITH PASSWORD 'openproject';" && \
-    sudo -u postgres psql -c "CREATE DATABASE openproject WITH OWNER openproject ENCODING 'UTF8' TEMPLATE template0;" && \
-    sudo -u postgres psql -c "GRANT ALL ON DATABASE openproject TO openproject;" && \
-    sv stop postgres
-
-ADD database.yml /openproject/config/
-ADD configuration.yml /openproject/config/
-ADD pg_hba.conf /etc/postgresql/9.3/main/
-
-#Init Db
-RUN runsv /etc/service/postgres & sleep 2 && sv start postgres && \
-    runsv /etc/service/memcache & sleep 3 && sv start memcache && \
-    cd /openproject && \
-    rake generate_secret_token && \
-    bundle exec rake db:create:all && \
-    bundle exec rake db:migrate RAILS_ENV=production && \
-    bundle exec rake db:seed RAILS_ENV=production && \
-    bundle exec rake assets:precompile && \
-    sv stop postgres

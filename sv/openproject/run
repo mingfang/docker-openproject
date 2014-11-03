@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sv start postgres || exit 1
+sv start mysql || exit 1
 
 cd /openproject
 
