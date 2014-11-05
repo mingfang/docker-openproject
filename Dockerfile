@@ -47,18 +47,15 @@ RUN curl http://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.4.tar.gz | tar -xz && \
 RUN gem install bundler
 
 #Openproject
+ENV OPENPROJECT_TAG v4.0.1
 RUN git clone https://github.com/opf/openproject.git
 ENV CONFIGURE_OPTS --disable-install-doc
-#Workaround yanked gem
-RUN mkdir -p /openproject/vendor/cache && \
-    cd /openproject/vendor/cache && \
-    wget https://rubygems.org/downloads/sprockets-2.2.2.backport2.gem
 #Plugins
 ADD Gemfile.plugins /openproject/
 #Passenger
 ADD Gemfile.local /openproject/
 RUN cd openproject && \
-    git checkout stable && \
+    git checkout tags/${OPENPROJECT_TAG} && \
     bundle install --without development test && \
     npm install && \
     bower install --allow-root
