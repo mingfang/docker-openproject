@@ -47,7 +47,7 @@ RUN curl http://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.4.tar.gz | tar -xz && \
 RUN gem install bundler
 
 #Openproject
-ENV OPENPROJECT_TAG v4.0.1
+ENV OPENPROJECT_TAG v4.0.2
 RUN git clone https://github.com/opf/openproject.git
 ENV CONFIGURE_OPTS --disable-install-doc
 #Plugins
