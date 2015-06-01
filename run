@@ -1,2 +1,2 @@
-docker run -v `pwd`/data:/var/lib/mysql -p 3000:3000 -d -t openproject
+docker run -v `pwd`/configuration.yml:/openproject/config/configuration.yml -v `pwd`/data:/var/lib/mysql -p 3000:3000 -d openproject
 
