@@ -24,7 +24,7 @@ RUN apt-get install -y memcached
 RUN apt-get install -y zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libmysqlclient-dev libpq-dev libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libgdbm-dev libncurses5-dev automake libtool bison libffi-dev
 
 #Node
-RUN curl http://nodejs.org/dist/v0.12.3/node-v0.12.3-linux-x64.tar.gz | tar xz
+RUN curl http://nodejs.org/dist/v0.12.5/node-v0.12.5-linux-x64.tar.gz | tar xz
 RUN mv node* node && \
     ln -s /node/bin/node /usr/local/bin/node && \
     ln -s /node/bin/npm /usr/local/bin/npm
@@ -43,11 +43,9 @@ RUN curl http://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.5.tar.gz | tar -xz && \
 RUN gem install bundler
 
 #Openproject
-#RUN wget -O - https://github.com/opf/openproject/archive/v4.1.0.tar.gz | tar zx
-#RUN mv openproject* openproject
 RUN git clone https://github.com/opf/openproject.git
 RUN cd openproject && \
-    git checkout v4.1.1
+    git checkout v4.1.3
 
 RUN echo '{ "allow_root": true }' >> ~/.bowerrc
 
